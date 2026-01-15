@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>notDumb.es - Planificador v6.0 MEJORADO</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #fff5f0 0%, #ffe4d6 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1800px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            padding: 30px; border-radius: 15px; color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(249, 115, 22, 0.3);
+        }
+        .logo { font-size: 2em; font-weight: bold; margin-bottom: 10px; }
+        .nav-buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white; padding: 12px 20px; border-radius: 10px;
+            cursor: pointer; font-weight: 600; transition: all 0.3s;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.3); }
+        .nav-btn.active { background: white; color: #f97316; }
+        .card {
+            background: white; border-radius: 15px; padding: 30px;
+            margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-size: 1.5em; color: #9a3412;
+            margin-bottom: 20px; font-weight: bold;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-label {
+            display: block; font-weight: 600;
+            color: #9a3412; margin-bottom: 8px;
+        }
+        .form-input, .form-select, textarea {
+            width: 100%; padding: 12px;
+            border: 2px solid #fed7aa; border-radius: 8px;
+            font-size: 1em; font-family: inherit;
+        }
+        .form-input:focus, .form-select:focus, textarea:focus {
+            outline: none; border-color: #f97316;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white; border: none; padding: 12px 24px;
+            border-radius: 10px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(249, 115, 22, 0.3);
+        }
+        .btn-secondary {
+            background: white; color: #f97316;
+            border: 2px solid #f97316; padding: 8px 16px;
+            border-radius: 8px; font-weight: 600;
+            cursor: pointer; font-size: 0.9em;
+        }
+        .asignatura-item {
+            background: #fff7ed; border: 2px solid #fed7aa;
+            border-radius: 10px; padding: 15px;
+            margin-bottom: 15px; position: relative;
+        }
+        .btn-remove {
+            position: absolute; top: 10px; right: 10px;
+            background: #fee2e2; color: #991b1b;
+            border: none; padding: 4px 8px;
+            border-radius: 6px; cursor: pointer; font-size: 0.85em;
+        }
+        .calendario-semanal { overflow-x: auto; margin-top: 20px; }
+        .calendario-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(5, 1fr);
+            gap: 1px; background: #fed7aa;
+            border: 2px solid #fed7aa; border-radius: 10px;
+            overflow: hidden; min-width: 900px;
+        }
+        .calendario-header {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white; padding: 12px;
+            font-weight: bold; text-align: center;
+        }
+        .calendario-hora {
+            background: #fff7ed; padding: 12px;
+            font-weight: 600; text-align: center;
+            font-size: 0.9em; color: #9a3412;
+        }
+        .calendario-celda {
+            background: white; padding: 8px;
+            min-height: 120px; position: relative;
+            transition: all 0.2s;
+        }
+        .calendario-celda:hover { background: #fffbeb; }
+        .clase-en-calendario {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #fbbf24; border-radius: 6px;
+            padding: 8px; margin-bottom: 4px;
+            font-size: 0.70em; line-height: 1.4;
+        }
+        .clase-en-calendario.grupo {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            border-color: #22c55e;
+        }
+        .clase-en-calendario.individual {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-color: #3b82f6;
+        }
+        .clase-en-calendario.urgente {
+            border: 3px solid #dc2626;
+            box-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
+        }
+        .clase-materia { font-weight: bold; color: #78350f; }
+        .clase-tema { color: #92400e; margin-top: 2px; font-size: 0.95em; }
+        .clase-alumnos {
+            color: #a16207; font-size: 0.9em; margin-top: 3px;
+        }
+        .clase-nombres {
+            background: #fef3c7; padding: 5px; margin-top: 5px;
+            border-radius: 3px; font-size: 0.85em;
+            color: #92400e; max-height: 60px; overflow-y: auto;
+        }
+        .clase-comentarios {
+            background: #fef3c7; border-left: 3px solid #f59e0b;
+            padding: 6px; margin-top: 5px; font-size: 0.9em;
+            color: #92400e; border-radius: 3px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            padding: 20px; border-radius: 12px;
+            border: 2px solid #fed7aa; text-align: center;
+        }
+        .stat-value {
+            font-size: 2em; font-weight: bold; color: #ea580c;
+        }
+        .stat-label {
+            color: #9a3412; margin-top: 8px;
+            font-weight: 600; font-size: 0.9em;
+        }
+        .alert {
+            padding: 15px 20px; border-radius: 10px;
+            margin-bottom: 20px; display: flex;
+            align-items: center; gap: 10px;
+        }
+        .alert-success {
+            background: #f0fdf4; color: #166534;
+            border: 2px solid #bbf7d0;
+        }
+        .alert-info {
+            background: #eff6ff; color: #1e40af;
+            border: 2px solid #bfdbfe;
+        }
+        .alert-warning {
+            background: #fef3c7; color: #92400e;
+            border: 2px solid #fde68a;
+        }
+        .hidden { display: none; }
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .badge-urgente {
+            background: #fee2e2; color: #991b1b;
+            padding: 3px 8px; border-radius: 12px;
+            font-size: 0.85em; font-weight: bold;
+            display: inline-block; margin-left: 5px;
+        }
+        .badge-individual {
+            background: #dbeafe; color: #1e40af;
+            padding: 3px 8px; border-radius: 12px;
+            font-size: 0.85em; font-weight: bold;
+            display: inline-block; margin-left: 5px;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white; padding: 12px; text-align: left; font-weight: 600;
+        }
+        td { padding: 12px; border-bottom: 1px solid #fed7aa; }
+        tbody tr:hover { background: #fff7ed; }
+        .profesor-card {
+            background: white; border: 2px solid #fed7aa;
+            border-radius: 10px; padding: 15px; margin-bottom: 15px;
+            position: relative;
+        }
+        .profesor-nombre {
+            font-size: 1.2em; font-weight: bold;
+            color: #9a3412; margin-bottom: 10px;
+        }
+        .btn-eliminar-prof {
+            position: absolute; top: 10px; right: 10px;
+            background: #fee2e2; color: #991b1b;
+            border: none; padding: 6px 12px;
+            border-radius: 6px; cursor: pointer;
+            font-size: 0.85em; font-weight: 600;
+        }
+        .checkbox-group {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .checkbox-group label {
+            display: flex; align-items: center; gap: 8px;
+            cursor: pointer;
+        }
+        .subtema-checkbox {
+            background: #fff7ed; border: 2px solid #fed7aa;
+            padding: 10px; border-radius: 8px; margin: 5px 0;
+        }
+        .file-upload-btn {
+            background: #f0fdf4; border: 2px dashed #22c55e;
+            padding: 15px; border-radius: 8px; text-align: center;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .file-upload-btn:hover {
+            background: #dcfce7;
+        }
+        .nivel-badge {
+            display: inline-block;
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 0.85em; font-weight: 600;
+        }
+        .nivel-bajo { background: #fee2e2; color: #991b1b; }
+        .nivel-alto { background: #dcfce7; color: #166534; }
+        .apuntes-link {
+            background: #dcfce7;
+            border: 2px solid #22c55e;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-top: 5px;
+            color: #166534;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .apuntes-link:hover {
+            background: #bbf7d0;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">notDumb.es - Planificador v6.0 🎯 MEJORADO</div>
+            <div style="opacity: 0.9; font-size: 1.1em;">
+                ✅ Instituto como texto libre · ✅ Discriminación por curso · ✅ Temarios actualizados<br>
+                ✅ Todos reciben sus horas · ✅ Distribución óptima de horarios
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="cambiarVista('estudiantes')">👥 Estudiantes</button>
+                <button class="nav-btn" onclick="cambiarVista('profesores')">👨‍🏫 Profesores</button>
+                <button class="nav-btn" onclick="cambiarVista('planificar')">⚙️ Planificar</button>
+                <button class="nav-btn hidden" id="btn-calendario" onclick="cambiarVista('calendario')">📅 Calendario</button>
+            </div>
+        </div>
+
+        <!-- VISTA: ESTUDIANTES -->
+        <div id="vista-estudiantes">
+            <div class="card">
+                <div class="card-title">👥 Registro de Estudiantes</div>
+                
+                <div class="alert alert-info">
+                    <span style="font-size: 1.5em;">✨</span>
+                    <div>
+                        <strong>NUEVO v6.0:</strong> 
+                        • Instituto ahora es campo libre para escribir<br>
+                        • Nunca se juntan 1º Bach con 2º Bach (2º Bach SÍ puede con Selectividad)<br>
+                        • Temarios completos de 1º y 2º Bach actualizados<br>
+                        • TODOS los alumnos reciben el 100% de sus horas (incluso individual si es necesario)<br>
+                        • Si pides 3h de una materia, se distribuyen en 3 slots diferentes
+                    </div>
+                </div>
+
+                <div style="background: #fffbeb; padding: 20px; border-radius: 10px; border: 2px solid #fef3c7; margin-bottom: 20px;">
+                    <h3 style="color: #9a3412; margin-bottom: 15px;">📝 Datos del Estudiante</h3>
+                    
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-input" id="est-nombre" placeholder="Ej: María García">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Curso *</label>
+                            <select class="form-select" id="est-curso" onchange="actualizarTemasDisponibles()">
+                                <option value="">Seleccionar...</option>
+                                <option value="1BAT">1º Bachillerato</option>
+                                <option value="2BAT">2º Bachillerato</option>
+                                <option value="SELECTIVIDAD">Selectividad</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Comunidad Autónoma *</label>
+                            <select class="form-select" id="est-comunidad" onchange="actualizarProvincias()">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Provincia *</label>
+                            <select class="form-select" id="est-provincia" onchange="actualizarCiudades()">
+                                <option value="">Primero selecciona comunidad</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ciudad *</label>
+                            <select class="form-select" id="est-ciudad">
+                                <option value="">Primero selecciona provincia</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Instituto * (escribe el nombre)</label>
+                            <input type="text" class="form-input" id="est-instituto" placeholder="Ej: IES Miguel de Cervantes">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Disponibilidad Horaria *</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px; margin-top: 10px;">
+                            <label><input type="checkbox" class="disp-check" value="L15"> L 15-16</label>
+                            <label><input type="checkbox" class="disp-check" value="L16"> L 16-17</label>
+                            <label><input type="checkbox" class="disp-check" value="L17"> L 17-18</label>
+                            <label><input type="checkbox" class="disp-check" value="L18"> L 18-19</label>
+                            <label><input type="checkbox" class="disp-check" value="L19"> L 19-20</label>
+                            <label><input type="checkbox" class="disp-check" value="L20"> L 20-21</label>
+                            <label><input type="checkbox" class="disp-check" value="M15"> M 15-16</label>
+                            <label><input type="checkbox" class="disp-check" value="M16"> M 16-17</label>
+                            <label><input type="checkbox" class="disp-check" value="M17"> M 17-18</label>
+                            <label><input type="checkbox" class="disp-check" value="M18"> M 18-19</label>
+                            <label><input type="checkbox" class="disp-check" value="M19"> M 19-20</label>
+                            <label><input type="checkbox" class="disp-check" value="M20"> M 20-21</label>
+                            <label><input type="checkbox" class="disp-check" value="X15"> X 15-16</label>
+                            <label><input type="checkbox" class="disp-check" value="X16"> X 16-17</label>
+                            <label><input type="checkbox" class="disp-check" value="X17"> X 17-18</label>
+                            <label><input type="checkbox" class="disp-check" value="X18"> X 18-19</label>
+                            <label><input type="checkbox" class="disp-check" value="X19"> X 19-20</label>
+                            <label><input type="checkbox" class="disp-check" value="X20"> X 20-21</label>
+                            <label><input type="checkbox" class="disp-check" value="J15"> J 15-16</label>
+                            <label><input type="checkbox" class="disp-check" value="J16"> J 16-17</label>
+                            <label><input type="checkbox" class="disp-check" value="J17"> J 17-18</label>
+                            <label><input type="checkbox" class="disp-check" value="J18"> J 18-19</label>
+                            <label><input type="checkbox" class="disp-check" value="J19"> J 19-20</label>
+                            <label><input type="checkbox" class="disp-check" value="J20"> J 20-21</label>
+                            <label><input type="checkbox" class="disp-check" value="V15"> V 15-16</label>
+                            <label><input type="checkbox" class="disp-check" value="V16"> V 16-17</label>
+                            <label><input type="checkbox" class="disp-check" value="V17"> V 17-18</label>
+                            <label><input type="checkbox" class="disp-check" value="V18"> V 18-19</label>
+                            <label><input type="checkbox" class="disp-check" value="V19"> V 19-20</label>
+                            <label><input type="checkbox" class="disp-check" value="V20"> V 20-21</label>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 25px 0; border: none; border-top: 2px solid #fed7aa;">
+
+                    <h4 style="color: #9a3412; margin-bottom: 15px;">📚 Temas y Subtemas</h4>
+                    <div id="asignaturas-lista"></div>
+                    
+                    <div class="form-grid-2" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label class="form-label">Asignatura *</label>
+                            <select class="form-select" id="nueva-asignatura" onchange="actualizarTemas()">
+                                <option value="">Primero selecciona curso</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tema *</label>
+                            <select class="form-select" id="nuevo-tema" onchange="actualizarSubtemas()">
+                                <option value="">Primero selecciona asignatura</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Subtemas que necesita * (Selecciona todos los que apliquen)</label>
+                        <div id="subtemas-disponibles" style="background: #fff7ed; padding: 15px; border-radius: 8px; border: 2px solid #fed7aa;">
+                            <p style="color: #9a3412; font-style: italic;">Primero selecciona un tema</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid-3" style="margin-top: 10px;">
+                        <div class="form-group">
+                            <label class="form-label">Última Nota (0-10) *</label>
+                            <input type="number" class="form-input" id="nueva-nota" min="0" max="10" step="0.5" value="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Horas Totales *</label>
+                            <input type="number" class="form-input" id="nuevas-horas" min="1" max="10" value="2">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fecha Examen (Opcional)</label>
+                            <input type="date" class="form-input" id="nueva-fecha-examen">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">📚 Subir Apuntes/Libro (PDF o Imagen)</label>
+                        <input type="file" id="archivo-apuntes" accept=".pdf,.jpg,.jpeg,.png" style="display: none;" onchange="mostrarArchivoSeleccionado()">
+                        <div class="file-upload-btn" onclick="document.getElementById('archivo-apuntes').click()">
+                            <div style="font-size: 2em; margin-bottom: 10px;">📤</div>
+                            <div style="font-weight: 600; color: #166534;">Click para subir apuntes</div>
+                            <div style="font-size: 0.85em; color: #166534; margin-top: 5px;">PDF, JPG o PNG</div>
+                            <div id="archivo-nombre" style="margin-top: 10px; font-weight: bold; color: #9a3412;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">🎯 Tipo de Clase (Puedes marcar varias)</label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" class="tipo-clase" value="Desde cero">
+                                <span>📖 Desde cero - Necesito aprender el tema completo</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" class="tipo-clase" value="Problemas">
+                                <span>🧮 Problemas - Necesito practicar ejercicios</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" class="tipo-clase" value="Repaso">
+                                <span>✅ Repaso general - Dudas finales antes del examen</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">💬 Comentarios Adicionales</label>
+                        <textarea class="form-input" id="nuevos-comentarios" rows="2" placeholder="Ej: Tengo dificultad con la notación, necesito ejemplos prácticos..."></textarea>
+                    </div>
+                    
+                    <button class="btn-primary" onclick="agregarTema()" style="width: 100%;">+ Agregar Tema/Subtemas</button>
+
+                    <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #fed7aa;">
+                        <button class="btn-primary" onclick="guardarEstudiante()" style="font-size: 1.1em; padding: 15px 30px;">
+                            ✅ GUARDAR ESTUDIANTE
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card-title" style="margin-top: 30px;">📋 Estudiantes Registrados</div>
+                <div id="lista-estudiantes"></div>
+            </div>
+        </div>
+
+        <!-- VISTA: PROFESORES -->
+        <div id="vista-profesores" class="hidden">
+            <div class="card">
+                <div class="card-title">👨‍🏫 Gestión de Profesores</div>
+                
+                <div style="background: #fffbeb; padding: 20px; border-radius: 10px; border: 2px solid #fef3c7; margin-bottom: 20px;">
+                    <h3 style="color: #9a3412; margin-bottom: 15px;">📝 Agregar Profesor</h3>
+                    
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" class="form-input" id="prof-nombre">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Asignaturas *</label>
+                            <div style="display: flex; gap: 15px; margin-top: 5px;">
+                                <label><input type="checkbox" class="prof-materia" value="Matemáticas"> Matemáticas</label>
+                                <label><input type="checkbox" class="prof-materia" value="Física"> Física</label>
+                                <label><input type="checkbox" class="prof-materia" value="Química"> Química</label>
+                                <label><input type="checkbox" class="prof-materia" value="Biología"> Biología</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Disponibilidad *</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 6px;">
+                            <label><input type="checkbox" class="prof-disp" value="L15"> L 15-16</label>
+                            <label><input type="checkbox" class="prof-disp" value="L16"> L 16-17</label>
+                            <label><input type="checkbox" class="prof-disp" value="L17"> L 17-18</label>
+                            <label><input type="checkbox" class="prof-disp" value="L18"> L 18-19</label>
+                            <label><input type="checkbox" class="prof-disp" value="L19"> L 19-20</label>
+                            <label><input type="checkbox" class="prof-disp" value="L20"> L 20-21</label>
+                            <label><input type="checkbox" class="prof-disp" value="M15"> M 15-16</label>
+                            <label><input type="checkbox" class="prof-disp" value="M16"> M 16-17</label>
+                            <label><input type="checkbox" class="prof-disp" value="M17"> M 17-18</label>
+                            <label><input type="checkbox" class="prof-disp" value="M18"> M 18-19</label>
+                            <label><input type="checkbox" class="prof-disp" value="M19"> M 19-20</label>
+                            <label><input type="checkbox" class="prof-disp" value="M20"> M 20-21</label>
+                            <label><input type="checkbox" class="prof-disp" value="X15"> X 15-16</label>
+                            <label><input type="checkbox" class="prof-disp" value="X16"> X 16-17</label>
+                            <label><input type="checkbox" class="prof-disp" value="X17"> X 17-18</label>
+                            <label><input type="checkbox" class="prof-disp" value="X18"> X 18-19</label>
+                            <label><input type="checkbox" class="prof-disp" value="X19"> X 19-20</label>
+                            <label><input type="checkbox" class="prof-disp" value="X20"> X 20-21</label>
+                            <label><input type="checkbox" class="prof-disp" value="J15"> J 15-16</label>
+                            <label><input type="checkbox" class="prof-disp" value="J16"> J 16-17</label>
+                            <label><input type="checkbox" class="prof-disp" value="J17"> J 17-18</label>
+                            <label><input type="checkbox" class="prof-disp" value="J18"> J 18-19</label>
+                            <label><input type="checkbox" class="prof-disp" value="J19"> J 19-20</label>
+                            <label><input type="checkbox" class="prof-disp" value="J20"> J 20-21</label>
+                            <label><input type="checkbox" class="prof-disp" value="V15"> V 15-16</label>
+                            <label><input type="checkbox" class="prof-disp" value="V16"> V 16-17</label>
+                            <label><input type="checkbox" class="prof-disp" value="V17"> V 17-18</label>
+                            <label><input type="checkbox" class="prof-disp" value="V18"> V 18-19</label>
+                            <label><input type="checkbox" class="prof-disp" value="V19"> V 19-20</label>
+                            <label><input type="checkbox" class="prof-disp" value="V20"> V 20-21</label>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" onclick="guardarProfesor()">✅ Guardar Profesor</button>
+                </div>
+
+                <div class="card-title">📋 Profesores</div>
+                <div id="lista-profesores"></div>
+            </div>
+        </div>
+
+        <!-- VISTA: PLANIFICAR -->
+        <div id="vista-planificar" class="hidden">
+            <div class="card">
+                <div class="card-title">⚙️ Generar Planificación</div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-estudiantes">0</div>
+                        <div class="stat-label">Estudiantes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-horas">0</div>
+                        <div class="stat-label">Horas Solicitadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-profesores">0</div>
+                        <div class="stat-label">Profesores</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-urgentes">0</div>
+                        <div class="stat-label">Exámenes ≤7 días</div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <span style="font-size: 1.5em;">🎯</span>
+                    <div>
+                        <strong>Algoritmo v6.0 - GARANTÍAS TOTALES:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>✅ Discriminación por curso: 1º Bach NUNCA con 2º Bach</li>
+                            <li>✅ 2º Bach SÍ puede agruparse con Selectividad</li>
+                            <li>✅ TODOS los alumnos reciben el 100% de sus horas solicitadas</li>
+                            <li>✅ Si no hay grupo compatible → clase individual garantizada</li>
+                            <li>✅ Si un alumno pide 3h del mismo tema → se distribuyen en 3 slots diferentes</li>
+                            <li>✅ Máximo 2 horas por día por estudiante</li>
+                            <li>✅ Agrupa por nivel: 0-5 / 5-7 / 7-8.5 / 8.5+</li>
+                            <li>✅ Prioriza exámenes urgentes (≤7 días)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="generarPlanificacion()" style="font-size: 1.2em; padding: 15px 40px;">
+                    ⚡ GENERAR PLANIFICACIÓN
+                </button>
+            </div>
+        </div>
+
+        <!-- VISTA: CALENDARIO -->
+        <div id="vista-calendario" class="hidden">
+            <div class="card">
+                <div class="card-title">📅 Calendario Semanal</div>
+                
+                <div id="resumen-planificacion"></div>
+
+                <div class="calendario-semanal">
+                    <div class="calendario-grid" id="calendario-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ BASE DE DATOS ============
+        let estudiantes = [];
+        let profesores = [];
+        let temasTemp = [];
+        let planificacion = null;
+        let contadorEstId = 1;
+        let contadorProfId = 1;
+        let archivoApuntes = null;
+
+        // ============ TEMARIO COMPLETO ACTUALIZADO ============
+        const temasDisponibles = {
+            '2BAT': {
+                'Química': {
+                    'BLOQUE 0: Formulación Inorgánica': [
+                        'Nomenclaturas. Estudio de valencias y número de oxidación',
+                        'Compuestos binarios (hidruros, óxidos, peróxidos, hidróxidos, ácidos)',
+                        'Compuestos ternarios (oxoácidos, oxisales)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 0: Formulación Orgánica': [
+                        'Hidrocarburos (alcanos, alquenos, alquinos, cíclicos, aromáticos)',
+                        'Grupos funcionales (alcoholes, éteres, aldehídos, cetonas, ácidos, ésteres, aminas, amidas)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 1: Modelos Atómicos': [
+                        'Modelos atómicos históricos (Dalton, Thomson, Rutherford, Bohr, Schrödinger)',
+                        'Números cuánticos y orbitales atómicos',
+                        'Configuración electrónica (Pauli, Hund, Aufbau)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 1: Tabla Periódica': [
+                        'Estructura de la tabla periódica. Grupos y períodos',
+                        'Propiedades periódicas I (radio atómico, radio iónico, energía de ionización)',
+                        'Propiedades periódicas II (afinidad electrónica, electronegatividad)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 2: Enlace Químico': [
+                        'Tipos de enlace químico (covalente, iónico, metálico)',
+                        'Estructuras de Lewis',
+                        'Geometría molecular (RPECV) y polaridad',
+                        'Teoría del enlace de Valencia (TEV). Hibridación sp, sp2, sp3',
+                        'Fuerzas intermoleculares (Van der Waals, puentes de hidrógeno)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 3: Estequiometría y Gases': [
+                        'Cálculo de masa, moles, moléculas, átomos',
+                        'Gases ideales y reales',
+                        'Disoluciones y concentraciones. Diluciones',
+                        'Estequiometría (rendimiento, riqueza, reactivo limitante)',
+                        'Fórmula empírica, molecular y composición centesimal',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 4: Termoquímica': [
+                        'Primer principio. Energía interna (calor y trabajo)',
+                        'Entalpía de reacción. Ecuaciones termoquímicas',
+                        'Cálculo con entalpías de formación y de enlace',
+                        'Ley de Hess',
+                        'Entropía. Segundo principio',
+                        'Energía libre de Gibbs. Espontaneidad',
+                        'Ciclo de Born-Haber',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 5: Cinética Química': [
+                        'Velocidad de reacción. Ecuación cinética',
+                        'Factores que afectan la velocidad (concentración, temperatura, catalizadores)',
+                        'Mecanismos de reacción. Catálisis',
+                        'Teorías cinéticas (colisiones, complejo activado)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 6: Equilibrio Químico': [
+                        'Constante Kc y Kp',
+                        'Cociente de reacción Q. Grado de disociación',
+                        'Presiones parciales',
+                        'Principio de Le Chatelier. Equilibrios heterogéneos',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 7: Equilibrio Ácido-Base': [
+                        'Teorías ácido-base. pH y pOH',
+                        'Fuerza de ácidos y bases. Constantes Ka y Kb',
+                        'Cálculo de pH en ácidos y bases fuertes y débiles',
+                        'Hidrólisis de sales. Disoluciones reguladoras',
+                        'Volumetrías ácido-base. Curvas de valoración',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 8: Equilibrio de Solubilidad': [
+                        'Constante Kps. Cálculo de solubilidad',
+                        'Predicción de precipitación (Q vs Kps)',
+                        'Efecto del ión común',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 9: Reacciones REDOX': [
+                        'Número de oxidación. Ajuste redox (ion-electrón)',
+                        'Pilas electroquímicas. Potencial estándar',
+                        'Espontaneidad de procesos redox. Ecuación de Nernst',
+                        'Electrólisis. Leyes de Faraday',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 10: Química Orgánica': [
+                        'Isomería (estructural, geométrica, óptica)',
+                        'Reacciones orgánicas (combustión, sustitución, adición, eliminación)',
+                        'Polímeros y biomoléculas',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ]
+                },
+                'Matemáticas': {
+                    'BLOQUE 1: Matrices y Determinantes': [
+                        'Matrices: tipos, operaciones (suma, producto, traspuesta)',
+                        'Determinantes: cálculo orden 2 y 3, propiedades',
+                        'Rango de una matriz. Matriz inversa',
+                        'Ecuaciones matriciales. Problemas de aplicación',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 1: Sistemas de Ecuaciones': [
+                        'Sistemas lineales sin parámetros (Rouché, Gauss, Cramer)',
+                        'Sistemas con parámetros. Interpretación geométrica',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 1: Vectores en el Espacio': [
+                        'Vectores: coordenadas, módulo, operaciones',
+                        'Producto escalar, ángulo entre vectores',
+                        'Producto vectorial (áreas)',
+                        'Producto mixto (volúmenes). Combinación lineal',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 2: Rectas y Planos': [
+                        'Ecuaciones de rectas (vectorial, paramétrica, continua)',
+                        'Ecuaciones de planos (general, vectorial, paramétrica)',
+                        'Posiciones relativas: 2 rectas, recta-plano',
+                        'Posiciones relativas: 2 planos, 3 planos',
+                        'Posiciones relativas con parámetros',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 2: Ángulos y Distancias': [
+                        'Ángulos: entre rectas, recta-plano, planos',
+                        'Distancia punto-plano, punto-recta',
+                        'Distancia entre planos, recta-plano',
+                        'Distancia entre rectas (paralelas y que se cruzan)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 2: Problemas Especiales': [
+                        'Puntos simétricos. Problemas con punto genérico',
+                        'Recta perpendicular común a dos rectas',
+                        'Recta que pasa por punto y corta a dos rectas',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 3: Límites y Continuidad': [
+                        'Dominio y recorrido. Funciones a trozos',
+                        'Concepto de límite. Límites laterales',
+                        'Indeterminaciones. Resolución (factorización, racionalización)',
+                        'Regla de L\'Hôpital',
+                        'Asíntotas de una función',
+                        'Continuidad y tipos de discontinuidad',
+                        'Teoremas (Bolzano, Weierstrass, Darboux)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 3: Derivadas': [
+                        'Concepto de derivada (definición, TVM)',
+                        'Reglas de derivación básicas',
+                        'Derivadas de funciones compuestas (regla de la cadena)',
+                        'Recta tangente y normal',
+                        'Teoremas (Rolle, Lagrange)',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 3: Aplicaciones de la Derivada': [
+                        'Monotonía: crecimiento y decrecimiento. Extremos',
+                        'Curvatura: concavidad y convexidad. Puntos de inflexión',
+                        'Aplicaciones con parámetros',
+                        'Representación gráfica completa',
+                        'Problemas de optimización',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 3: Integrales': [
+                        'Primitivas. Integrales inmediatas y casi inmediatas',
+                        'Métodos: integración por partes',
+                        'Métodos: integración por sustitución',
+                        'Integral definida. Regla de Barrow',
+                        'Cálculo de áreas entre curvas',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 4: Probabilidad': [
+                        'Espacio muestral. Operaciones con sucesos',
+                        'Probabilidad. Regla de Laplace. Propiedades',
+                        'Probabilidad condicionada. Diagramas de árbol',
+                        'Variables aleatorias discretas y continuas',
+                        'Teorema de la probabilidad total y Bayes',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 4: Distribuciones de Probabilidad': [
+                        'Distribución binomial',
+                        'Distribución normal. Tipificación',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 4: Estadística': [
+                        'Muestreo y distribución de la media muestral',
+                        'Intervalos de confianza para la media',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ]
+                },
+                'Física': {
+                    'BLOQUE 0: Vectores en Física': [
+                        'Magnitudes escalares y vectoriales. Ecuación dimensional',
+                        'Características de vectores: componentes, módulo, operaciones',
+                        'Derivadas. Descripción vectorial del movimiento',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 1: Cinemática': [
+                        'Movimientos rectilíneos (MRU y MRUA, caída libre)',
+                        'Movimiento parabólico (tiro horizontal y oblicuo)',
+                        'Movimientos circulares: MCU y MCUA',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 1: Dinámica': [
+                        'Leyes de Newton y Fuerzas',
+                        'Ejercicios de dinámica de un cuerpo solo. Planos inclinados',
+                        'Ejercicios de dinámica de cuerpos enlazados',
+                        'Ley de Hooke y Fuerza centrípeta',
+                        'Impulso. Cantidad de movimiento',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 1: Trabajo y Energía': [
+                        'Trabajo. Ejercicios. Potencia',
+                        'Tipos de energía. Fuerzas conservativas',
+                        'Conservación de la energía mecánica',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 2: Campo Gravitatorio': [
+                        'Leyes de Kepler',
+                        'Momento angular de los planetas',
+                        'Ley de gravitación universal. Fuerza gravitatoria',
+                        'Campo gravitatorio: intensidad y principio de superposición',
+                        'Potencial gravitatorio. Energía potencial',
+                        'Satélites. Velocidad orbital y de escape',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 3: Campo Eléctrico': [
+                        'Carga eléctrica. Ley de Coulomb',
+                        'Campo eléctrico: intensidad. Líneas de campo',
+                        'Potencial eléctrico. Diferencia de potencial',
+                        'Condensadores. Movimiento de cargas',
+                        'Ley de Gauss: Flujo eléctrico y aplicaciones',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 4: Campo Magnético': [
+                        'Campo magnético. Fuerza de Lorentz',
+                        'Fuerza magnética sobre cargas móviles',
+                        'Fuerza magnética + campo eléctrico',
+                        'Fuerza magnética sobre hilo conductor. Ley de Biot y Savart',
+                        'Campo magnético en espiras y solenoide',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 5: Inducción Electromagnética': [
+                        'Flujo magnético. Ley de Faraday-Lenz',
+                        'Aplicaciones: Transformadores y corrientes de Foucault',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 6: MHS': [
+                        'Movimiento armónico simple: ecuaciones',
+                        'Dinámica del MHS: muelles y péndulos',
+                        'Energía en el MHS',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 6: Ondas': [
+                        'Movimiento ondulatorio. Ondas armónicas',
+                        'Energía. Intensidad y atenuación',
+                        'Ondas sonoras. Principio de Huygens',
+                        'Interferencia y ondas estacionarias',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 7: Óptica Física': [
+                        'Naturaleza de la luz. Ondas electromagnéticas',
+                        'Fenómenos ondulatorios de la luz',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 7: Óptica Geométrica': [
+                        'Conceptos. Espejos planos y esféricos',
+                        'Lentes delgadas',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 8: Física Moderna': [
+                        'Relatividad especial: postulados, transformaciones',
+                        'Dinámica relativista. E=mc²',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 8: Física Cuántica': [
+                        'Efecto fotoeléctrico. Dualidad onda-corpúsculo',
+                        'Modelos atómicos. Espectros. Principio de Heisenberg',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ],
+                    'BLOQUE 8: Física Nuclear': [
+                        'Radiaciones. Núcleo atómico. Energía de enlace',
+                        'Radiactividad: tipos, ley de desintegración',
+                        'Reacciones nucleares. Partículas elementales',
+                        'Repaso Integral del Tema (problemas variados)'
+                    ]
+                },
+                'Biología': {
+                    'Biomoléculas': ['Glúcidos', 'Lípidos', 'Proteínas', 'Ácidos nucleicos', 'Repaso Integral del Tema (problemas variados)'],
+                    'Metabolismo': ['Catabolismo', 'Anabolismo', 'Respiración', 'Fotosíntesis', 'Repaso Integral del Tema (problemas variados)'],
+                    'Genética Molecular': ['Replicación', 'Transcripción', 'Traducción', 'Mutaciones', 'Repaso Integral del Tema (problemas variados)']
+                }
+            },
+            '1BAT': {
+                'Matemáticas': {
+                    'Números Reales': ['Clasificación de números', 'Radicales y potencias', 'Logaritmos', 'Números complejos', 'Repaso Integral del Tema (problemas variados)'],
+                    'Álgebra': ['Polinomios', 'Ecuaciones', 'Sistemas de ecuaciones', 'Inecuaciones', 'Repaso Integral del Tema (problemas variados)'],
+                    'Trigonometría': ['Razones trigonométricas', 'Identidades', 'Ecuaciones trigonométricas', 'Resolución de triángulos', 'Repaso Integral del Tema (problemas variados)'],
+                    'Geometría': ['Vectores en el plano', 'Ecuaciones de la recta', 'Posiciones relativas', 'Distancias y ángulos', 'Repaso Integral del Tema (problemas variados)'],
+                    'Funciones': ['Dominio y recorrido', 'Tipos de funciones', 'Límites y continuidad', 'Derivadas', 'Aplicaciones derivadas', 'Repaso Integral del Tema (problemas variados)'],
+                    'Estadística': ['Estadística bidimensional', 'Probabilidad', 'Distribución binomial', 'Distribución normal', 'Repaso Integral del Tema (problemas variados)']
+                },
+                'Física': {
+                    'Vectores y Magnitudes': ['Magnitudes físicas', 'Operaciones con vectores', 'Producto escalar y vectorial', 'Repaso Integral del Tema (problemas variados)'],
+                    'Cinemática': ['MRU y MRUA', 'Caída libre', 'Movimiento parabólico', 'Movimiento circular', 'Repaso Integral del Tema (problemas variados)'],
+                    'Dinámica': ['Leyes de Newton', 'Fuerzas', 'Planos inclinados', 'Dinámica circular', 'Repaso Integral del Tema (problemas variados)'],
+                    'Energía': ['Trabajo y potencia', 'Energía cinética', 'Energía potencial', 'Conservación de la energía', 'Cantidad de movimiento', 'Repaso Integral del Tema (problemas variados)'],
+                    'Gravitación': ['Ley de gravitación universal', 'Leyes de Kepler', 'Campo gravitatorio', 'Repaso Integral del Tema (problemas variados)'],
+                    'MHS': ['Cinemática del MHS', 'Dinámica del MHS', 'Repaso Integral del Tema (problemas variados)'],
+                    'Electricidad': ['Ley de Coulomb', 'Campo eléctrico', 'Corriente continua', 'Ley de Ohm', 'Circuitos', 'Repaso Integral del Tema (problemas variados)']
+                },
+                'Química': {
+                    'Átomo': ['Modelos atómicos', 'Configuración electrónica', 'Tabla periódica', 'Propiedades periódicas', 'Repaso Integral del Tema (problemas variados)'],
+                    'Enlace': ['Enlace iónico', 'Enlace covalente', 'Enlace metálico', 'Fuerzas intermoleculares', 'Repaso Integral del Tema (problemas variados)'],
+                    'Gases': ['Leyes de los gases', 'Gas ideal', 'Mezclas de gases', 'Repaso Integral del Tema (problemas variados)'],
+                    'Disoluciones': ['Concentraciones', 'Preparación de disoluciones', 'Repaso Integral del Tema (problemas variados)'],
+                    'Estequiometría': ['Relaciones de masa', 'Reactivo limitante', 'Rendimiento', 'Repaso Integral del Tema (problemas variados)'],
+                    'Termoquímica': ['Entalpía', 'Ley de Hess', 'Entropía y Gibbs', 'Repaso Integral del Tema (problemas variados)'],
+                    'Química Orgánica': ['Hidrocarburos', 'Grupos funcionales', 'Nomenclatura IUPAC', 'Isomería', 'Repaso Integral del Tema (problemas variados)']
+                },
+                'Biología': {
+                    'Bioquímica': ['Bioelementos y agua', 'Glúcidos y lípidos', 'Proteínas', 'Ácidos nucleicos', 'Repaso Integral del Tema (problemas variados)'],
+                    'Célula': ['Teoría celular', 'Orgánulos celulares', 'Ciclo celular', 'Mitosis y meiosis', 'Repaso Integral del Tema (problemas variados)'],
+                    'Genética': ['Leyes de Mendel', 'Herencia ligada al sexo', 'Problemas de genética', 'Repaso Integral del Tema (problemas variados)'],
+                    'Evolución': ['Teorías evolutivas', 'Pruebas de la evolución', 'Especiación', 'Repaso Integral del Tema (problemas variados)'],
+                    'Biodiversidad': ['Clasificación', 'Cinco reinos', 'Virus', 'Repaso Integral del Tema (problemas variados)'],
+                    'Histología': ['Tejidos vegetales', 'Tejidos animales', 'Repaso Integral del Tema (problemas variados)'],
+                    'Fisiología': ['Funciones vitales en plantas', 'Funciones vitales en animales', 'Repaso Integral del Tema (problemas variados)'],
+                    'Ecología': ['Ecosistemas', 'Dinámica de poblaciones', 'Impacto humano', 'Repaso Integral del Tema (problemas variados)']
+                }
+            },
+            'SELECTIVIDAD': {
+                'Matemáticas': {
+                    'Repaso General': ['Álgebra y geometría completos', 'Análisis completo', 'Probabilidad y estadística', 'Estrategia de examen EBAU', 'Repaso Integral del Tema (problemas variados)']
+                },
+                'Física': {
+                    'Repaso General': ['Mecánica completa', 'Campos completos', 'Ondas y óptica', 'Física moderna', 'Estrategia de examen EBAU', 'Repaso Integral del Tema (problemas variados)']
+                },
+                'Química': {
+                    'Repaso General': ['Estructura y enlace', 'Termoquímica y cinética', 'Equilibrios químicos', 'Redox y orgánica', 'Estrategia de examen EBAU', 'Repaso Integral del Tema (problemas variados)']
+                },
+                'Biología': {
+                    'Repaso General': ['Biomoléculas y metabolismo', 'Genética molecular completa', 'Estrategia de examen EBAU', 'Repaso Integral del Tema (problemas variados)']
+                }
+            }
+        };
+
+        // ============ COMUNIDADES AUTÓNOMAS Y PROVINCIAS ============
+        const comunidadesAutonomas = [
+            'Andalucía', 'Aragón', 'Principado de Asturias', 'Islas Baleares', 'Canarias',
+            'Cantabria', 'Castilla-La Mancha', 'Castilla y León', 'Cataluña',
+            'Comunidad Valenciana', 'Extremadura', 'Galicia', 'Comunidad de Madrid',
+            'Región de Murcia', 'Comunidad Foral de Navarra', 'País Vasco', 'La Rioja',
+            'Ceuta', 'Melilla'
+        ];
+
+        const provincias = {
+            'Andalucía': ['Almería', 'Cádiz', 'Córdoba', 'Granada', 'Huelva', 'Jaén', 'Málaga', 'Sevilla'],
+            'Aragón': ['Huesca', 'Teruel', 'Zaragoza'],
+            'Principado de Asturias': ['Asturias'],
+            'Islas Baleares': ['Baleares'],
+            'Canarias': ['Las Palmas', 'Santa Cruz de Tenerife'],
+            'Cantabria': ['Cantabria'],
+            'Castilla-La Mancha': ['Albacete', 'Ciudad Real', 'Cuenca', 'Guadalajara', 'Toledo'],
+            'Castilla y León': ['Ávila', 'Burgos', 'León', 'Palencia', 'Salamanca', 'Segovia', 'Soria', 'Valladolid', 'Zamora'],
+            'Cataluña': ['Barcelona', 'Girona', 'Lleida', 'Tarragona'],
+            'Comunidad Valenciana': ['Alicante', 'Castellón', 'Valencia'],
+            'Extremadura': ['Badajoz', 'Cáceres'],
+            'Galicia': ['A Coruña', 'Lugo', 'Ourense', 'Pontevedra'],
+            'Comunidad de Madrid': ['Madrid'],
+            'Región de Murcia': ['Murcia'],
+            'Comunidad Foral de Navarra': ['Navarra'],
+            'País Vasco': ['Álava', 'Guipúzcoa', 'Vizcaya'],
+            'La Rioja': ['La Rioja'],
+            'Ceuta': ['Ceuta'],
+            'Melilla': ['Melilla']
+        };
+
+        const ciudades = {
+            'Almería': ['Almería', 'Roquetas de Mar', 'El Ejido', 'Níjar', 'Vícar'],
+            'Cádiz': ['Cádiz', 'Jerez de la Frontera', 'Algeciras', 'San Fernando', 'El Puerto de Santa María'],
+            'Córdoba': ['Córdoba', 'Lucena', 'Puente Genil', 'Montilla'],
+            'Granada': ['Granada', 'Motril', 'Almuñécar', 'Baza'],
+            'Huelva': ['Huelva', 'Lepe', 'Moguer', 'Ayamonte'],
+            'Jaén': ['Jaén', 'Linares', 'Andújar', 'Úbeda'],
+            'Málaga': ['Málaga', 'Marbella', 'Vélez-Málaga', 'Fuengirola', 'Mijas', 'Torremolinos'],
+            'Sevilla': ['Sevilla', 'Dos Hermanas', 'Alcalá de Guadaíra', 'Utrera'],
+            'Huesca': ['Huesca', 'Monzón', 'Barbastro'],
+            'Teruel': ['Teruel', 'Alcañiz', 'Andorra'],
+            'Zaragoza': ['Zaragoza', 'Calatayud', 'Utebo'],
+            'Asturias': ['Oviedo', 'Gijón', 'Avilés', 'Langreo'],
+            'Baleares': ['Palma de Mallorca', 'Calvià', 'Manacor', 'Ibiza'],
+            'Las Palmas': ['Las Palmas de Gran Canaria', 'Telde', 'Arucas'],
+            'Santa Cruz de Tenerife': ['Santa Cruz de Tenerife', 'San Cristóbal de La Laguna', 'Arona'],
+            'Cantabria': ['Santander', 'Torrelavega', 'Castro Urdiales'],
+            'Albacete': ['Albacete', 'Hellín', 'Villarrobledo'],
+            'Ciudad Real': ['Ciudad Real', 'Puertollano', 'Tomelloso'],
+            'Cuenca': ['Cuenca', 'Tarancón'],
+            'Guadalajara': ['Guadalajara', 'Azuqueca de Henares'],
+            'Toledo': ['Toledo', 'Talavera de la Reina', 'Illescas'],
+            'Ávila': ['Ávila', 'Arévalo'],
+            'Burgos': ['Burgos', 'Aranda de Duero', 'Miranda de Ebro'],
+            'León': ['León', 'Ponferrada'],
+            'Palencia': ['Palencia', 'Guardo'],
+            'Salamanca': ['Salamanca', 'Béjar'],
+            'Segovia': ['Segovia', 'Cuéllar'],
+            'Soria': ['Soria', 'El Burgo de Osma'],
+            'Valladolid': ['Valladolid', 'Medina del Campo', 'Laguna de Duero'],
+            'Zamora': ['Zamora', 'Benavente'],
+            'Barcelona': ['Barcelona', 'Hospitalet de Llobregat', 'Badalona', 'Terrassa', 'Sabadell', 'Mataró'],
+            'Girona': ['Girona', 'Figueres', 'Blanes'],
+            'Lleida': ['Lleida', 'Tàrrega'],
+            'Tarragona': ['Tarragona', 'Reus', 'Tortosa'],
+            'Alicante': ['Alicante', 'Elche', 'Torrevieja', 'Orihuela', 'Benidorm'],
+            'Castellón': ['Castellón de la Plana', 'Vila-real', 'Borriana'],
+            'Valencia': ['Valencia', 'Torrent', 'Gandía', 'Paterna'],
+            'Badajoz': ['Badajoz', 'Mérida', 'Don Benito'],
+            'Cáceres': ['Cáceres', 'Plasencia'],
+            'A Coruña': ['A Coruña', 'Santiago de Compostela', 'Ferrol'],
+            'Lugo': ['Lugo', 'Monforte de Lemos'],
+            'Ourense': ['Ourense', 'Verín'],
+            'Pontevedra': ['Vigo', 'Pontevedra', 'Vilagarcía de Arousa'],
+            'Madrid': ['Madrid', 'Móstoles', 'Alcalá de Henares', 'Fuenlabrada', 'Leganés', 'Getafe'],
+            'Murcia': ['Murcia', 'Cartagena', 'Lorca'],
+            'Navarra': ['Pamplona', 'Tudela'],
+            'Álava': ['Vitoria-Gasteiz'],
+            'Guipúzcoa': ['San Sebastián', 'Irún'],
+            'Vizcaya': ['Bilbao', 'Barakaldo', 'Getxo'],
+            'La Rioja': ['Logroño', 'Calahorra'],
+            'Ceuta': ['Ceuta'],
+            'Melilla': ['Melilla']
+        };
+
+        // ============ FUNCIONES DE UI ============
+        function cambiarVista(vista) {
+            document.querySelectorAll('[id^="vista-"]').forEach(v => v.classList.add('hidden'));
+            document.getElementById('vista-' + vista).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (vista === 'planificar') actualizarStats();
+        }
+
+        function cargarComunidades() {
+            const select = document.getElementById('est-comunidad');
+            comunidadesAutonomas.forEach(ca => {
+                select.innerHTML += `<option value="${ca}">${ca}</option>`;
+            });
+        }
+
+        function actualizarProvincias() {
+            const comunidad = document.getElementById('est-comunidad').value;
+            const selectProvincia = document.getElementById('est-provincia');
+            const selectCiudad = document.getElementById('est-ciudad');
+            
+            selectProvincia.innerHTML = '<option value="">Seleccionar...</option>';
+            selectCiudad.innerHTML = '<option value="">Primero selecciona provincia</option>';
+            
+            if (comunidad && provincias[comunidad]) {
+                provincias[comunidad].forEach(prov => {
+                    selectProvincia.innerHTML += `<option value="${prov}">${prov}</option>`;
+                });
+            }
+        }
+
+        function actualizarCiudades() {
+            const provincia = document.getElementById('est-provincia').value;
+            const selectCiudad = document.getElementById('est-ciudad');
+            
+            selectCiudad.innerHTML = '<option value="">Seleccionar...</option>';
+            
+            if (provincia && ciudades[provincia]) {
+                ciudades[provincia].forEach(ciudad => {
+                    selectCiudad.innerHTML += `<option value="${ciudad}">${ciudad}</option>`;
+                });
+            }
+        }
+
+        function actualizarTemasDisponibles() {
+            const curso = document.getElementById('est-curso').value;
+            const selectAsignatura = document.getElementById('nueva-asignatura');
+            
+            selectAsignatura.innerHTML = '<option value="">Seleccionar...</option>';
+            
+            if (curso && temasDisponibles[curso]) {
+                Object.keys(temasDisponibles[curso]).forEach(asig => {
+                    selectAsignatura.innerHTML += `<option value="${asig}">${asig}</option>`;
+                });
+            }
+        }
+
+        function actualizarTemas() {
+            const curso = document.getElementById('est-curso').value;
+            const asignatura = document.getElementById('nueva-asignatura').value;
+            const selectTema = document.getElementById('nuevo-tema');
+            
+            selectTema.innerHTML = '<option value="">Seleccionar...</option>';
+            
+            if (curso && asignatura && temasDisponibles[curso][asignatura]) {
+                Object.keys(temasDisponibles[curso][asignatura]).forEach(tema => {
+                    selectTema.innerHTML += `<option value="${tema}">${tema}</option>`;
+                });
+            }
+        }
+
+        function actualizarSubtemas() {
+            const curso = document.getElementById('est-curso').value;
+            const asignatura = document.getElementById('nueva-asignatura').value;
+            const tema = document.getElementById('nuevo-tema').value;
+            const divSubtemas = document.getElementById('subtemas-disponibles');
+            
+            divSubtemas.innerHTML = '';
+            
+            if (curso && asignatura && tema && temasDisponibles[curso][asignatura][tema]) {
+                const subtemas = temasDisponibles[curso][asignatura][tema];
+                subtemas.forEach(subtema => {
+                    divSubtemas.innerHTML += `
+                        <div class="subtema-checkbox">
+                            <label>
+                                <input type="checkbox" class="subtema-select" value="${subtema}">
+                                <strong>${subtema}</strong>
+                            </label>
+                        </div>
+                    `;
+                });
+            } else {
+                divSubtemas.innerHTML = '<p style="color: #9a3412; font-style: italic;">Primero selecciona un tema</p>';
+            }
+        }
+
+        function mostrarArchivoSeleccionado() {
+            const input = document.getElementById('archivo-apuntes');
+            const divNombre = document.getElementById('archivo-nombre');
+            
+            if (input.files.length > 0) {
+                archivoApuntes = input.files[0];
+                divNombre.textContent = `✅ ${archivoApuntes.name}`;
+            }
+        }
+
+        function agregarTema() {
+            const curso = document.getElementById('est-curso').value;
+            const asignatura = document.getElementById('nueva-asignatura').value;
+            const tema = document.getElementById('nuevo-tema').value;
+            const subtemasSeleccionados = Array.from(document.querySelectorAll('.subtema-select:checked')).map(cb => cb.value);
+            const nota = parseFloat(document.getElementById('nueva-nota').value);
+            const horas = parseInt(document.getElementById('nuevas-horas').value);
+            const fechaExamen = document.getElementById('nueva-fecha-examen').value || null;
+            const tiposClase = Array.from(document.querySelectorAll('.tipo-clase:checked')).map(cb => cb.value);
+            const comentarios = document.getElementById('nuevos-comentarios').value || '';
+
+            if (!curso || !asignatura || !tema || subtemasSeleccionados.length === 0 || !horas || isNaN(nota)) {
+                alert('⚠️ Completa todos los campos obligatorios y selecciona al menos un subtema');
+                return;
+            }
+
+            let urgente = false;
+            if (fechaExamen) {
+                const dias = Math.floor((new Date(fechaExamen) - new Date()) / (1000 * 60 * 60 * 24));
+                urgente = dias <= 7;
+            }
+
+            temasTemp.push({ 
+                curso,
+                asignatura, 
+                tema, 
+                subtemas: subtemasSeleccionados,
+                nota, 
+                horas, 
+                fechaExamen, 
+                tiposClase,
+                comentarios, 
+                urgente,
+                archivo: archivoApuntes ? archivoApuntes.name : null
+            });
+            
+            // Limpiar
+            document.getElementById('nueva-asignatura').value = '';
+            document.getElementById('nuevo-tema').value = '';
+            document.getElementById('subtemas-disponibles').innerHTML = '<p style="color: #9a3412; font-style: italic;">Primero selecciona un tema</p>';
+            document.getElementById('nueva-nota').value = '5';
+            document.getElementById('nuevas-horas').value = '2';
+            document.getElementById('nueva-fecha-examen').value = '';
+            document.querySelectorAll('.tipo-clase').forEach(cb => cb.checked = false);
+            document.getElementById('nuevos-comentarios').value = '';
+            document.getElementById('archivo-apuntes').value = '';
+            document.getElementById('archivo-nombre').textContent = '';
+            archivoApuntes = null;
+            
+            renderizarTemas();
+        }
+
+        function renderizarTemas() {
+            const lista = document.getElementById('asignaturas-lista');
+            if (temasTemp.length === 0) {
+                lista.innerHTML = '<p style="color: #9a3412; font-style: italic;">No hay temas agregados.</p>';
+                return;
+            }
+
+            let html = '<div style="display: flex; flex-wrap: wrap; gap: 10px;">';
+            let totalHoras = 0;
+            temasTemp.forEach((t, idx) => {
+                totalHoras += t.horas;
+                const urgenteTag = t.urgente ? '<span class="badge-urgente">🔥 URGENTE</span>' : '';
+                const nivelBadge = t.nota < 6 ? 
+                    `<span class="nivel-badge nivel-bajo">Nivel Bajo (${t.nota})</span>` :
+                    `<span class="nivel-badge nivel-alto">Nivel Alto (${t.nota})</span>`;
+                
+                html += `
+                    <div class="asignatura-item">
+                        <button class="btn-remove" onclick="eliminarTema(${idx})">✕</button>
+                        <div style="font-weight: bold; color: #9a3412;">${t.asignatura} ${urgenteTag}</div>
+                        <div style="font-size: 0.9em; color: #92400e;">📖 ${t.tema}</div>
+                        <div style="font-size: 0.85em; color: #a16207; margin-top: 5px;">
+                            <strong>Subtemas:</strong><br>
+                            ${t.subtemas.map(st => '• ' + st).join('<br>')}
+                        </div>
+                        <div style="margin-top: 8px;">${nivelBadge}</div>
+                        <div style="font-size: 0.9em; color: #78350f; font-weight: bold; margin-top: 5px;">⏱️ ${t.horas} hora(s)</div>
+                        ${t.fechaExamen ? '<div style="font-size: 0.8em; color: #92400e;">📅 ' + new Date(t.fechaExamen).toLocaleDateString('es-ES') + '</div>' : ''}
+                        ${t.tiposClase.length > 0 ? '<div style="font-size: 0.8em; color: #92400e;">🎯 ' + t.tiposClase.join(', ') + '</div>' : ''}
+                        ${t.archivo ? '<div style="font-size: 0.8em; color: #166534;">📚 ' + t.archivo + '</div>' : ''}
+                        ${t.comentarios ? '<div style="font-size: 0.8em; color: #92400e; margin-top: 3px;">💬 ' + t.comentarios.substring(0, 40) + '...</div>' : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            
+            const colorAviso = totalHoras > 10 ? '#991b1b' : '#9a3412';
+            const avisoExtra = totalHoras > 10 ? ' ⚠️ Supera máximo!' : '';
+            html += `<p style="margin-top: 15px; font-weight: bold; color: ${colorAviso};">Total: ${totalHoras} hora(s)${avisoExtra}</p>`;
+            lista.innerHTML = html;
+        }
+
+        function eliminarTema(idx) {
+            temasTemp.splice(idx, 1);
+            renderizarTemas();
+        }
+
+        function guardarEstudiante() {
+            const nombre = document.getElementById('est-nombre').value;
+            const curso = document.getElementById('est-curso').value;
+            const comunidad = document.getElementById('est-comunidad').value;
+            const provincia = document.getElementById('est-provincia').value;
+            const ciudad = document.getElementById('est-ciudad').value;
+            const instituto = document.getElementById('est-instituto').value.trim();
+            const disponibilidad = Array.from(document.querySelectorAll('.disp-check:checked')).map(cb => cb.value);
+
+            if (!nombre || !curso || !comunidad || !provincia || !ciudad || !instituto || disponibilidad.length === 0) {
+                alert('⚠️ Completa todos los campos obligatorios');
+                return;
+            }
+
+            if (temasTemp.length === 0) {
+                alert('⚠️ Agrega al menos un tema');
+                return;
+            }
+
+            const totalHoras = temasTemp.reduce((sum, t) => sum + t.horas, 0);
+            if (totalHoras > 10) {
+                alert('⚠️ Máximo 10 horas semanales');
+                return;
+            }
+
+            estudiantes.push({
+                id: contadorEstId++,
+                nombre, curso, comunidad, provincia, ciudad, instituto,
+                disponibilidad,
+                temas: JSON.parse(JSON.stringify(temasTemp))
+            });
+            
+            // Limpiar
+            document.getElementById('est-nombre').value = '';
+            document.getElementById('est-curso').value = '';
+            document.getElementById('est-comunidad').value = '';
+            document.getElementById('est-provincia').value = '';
+            document.getElementById('est-ciudad').value = '';
+            document.getElementById('est-instituto').value = '';
+            document.querySelectorAll('.disp-check').forEach(cb => cb.checked = false);
+            temasTemp = [];
+            renderizarTemas();
+            
+            alert(`✅ Estudiante guardado con ${totalHoras} hora(s)`);
+            renderizarEstudiantes();
+        }
+
+        function renderizarEstudiantes() {
+            const lista = document.getElementById('lista-estudiantes');
+            if (estudiantes.length === 0) {
+                lista.innerHTML = '<div class="alert alert-info"><span>ℹ️</span><div>No hay estudiantes</div></div>';
+                return;
+            }
+
+            let html = '<table><thead><tr><th>Nombre</th><th>Curso</th><th>Instituto</th><th>Ubicación</th><th>Horas</th><th>Ver</th></tr></thead><tbody>';
+            estudiantes.forEach(est => {
+                const totalHoras = est.temas.reduce((sum, t) => sum + t.horas, 0);
+                html += `<tr>
+                    <td><strong>${est.nombre}</strong></td>
+                    <td>${est.curso}</td>
+                    <td>${est.instituto}</td>
+                    <td>${est.ciudad}, ${est.comunidad}</td>
+                    <td><strong>${totalHoras}h</strong></td>
+                    <td><button class="btn-secondary" onclick="verDetalle(${est.id})">👁️</button></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            lista.innerHTML = html;
+        }
+
+        function verDetalle(id) {
+            const est = estudiantes.find(e => e.id === id);
+            let det = `${est.nombre} (${est.curso})\n`;
+            det += `${est.instituto}, ${est.ciudad}, ${est.provincia}, ${est.comunidad}\n\n`;
+            det += `DISPONIBILIDAD: ${est.disponibilidad.join(', ')}\n\nTEMAS:\n\n`;
+            est.temas.forEach((t, i) => {
+                det += `${i+1}. ${t.asignatura} → ${t.tema}\n`;
+                det += `   Subtemas: ${t.subtemas.join(', ')}\n`;
+                det += `   📊 Nota: ${t.nota}/10 | ⏱️ ${t.horas}h`;
+                if (t.fechaExamen) det += ` | 📅 ${new Date(t.fechaExamen).toLocaleDateString('es-ES')}`;
+                if (t.urgente) det += ' 🔥';
+                if (t.tiposClase.length > 0) det += `\n   🎯 ${t.tiposClase.join(', ')}`;
+                if (t.comentarios) det += `\n   💬 ${t.comentarios}`;
+                if (t.archivo) det += `\n   📚 ${t.archivo}`;
+                det += '\n\n';
+            });
+            alert(det);
+        }
+
+        // ============ PROFESORES ============
+        function guardarProfesor() {
+            const nombre = document.getElementById('prof-nombre').value;
+            const materias = Array.from(document.querySelectorAll('.prof-materia:checked')).map(cb => cb.value);
+            const disponibilidad = Array.from(document.querySelectorAll('.prof-disp:checked')).map(cb => cb.value);
+
+            if (!nombre || materias.length === 0 || disponibilidad.length === 0) {
+                alert('⚠️ Completa todos los campos');
+                return;
+            }
+
+            profesores.push({
+                id: contadorProfId++,
+                nombre, materias, disponibilidad
+            });
+            
+            document.getElementById('prof-nombre').value = '';
+            document.querySelectorAll('.prof-materia').forEach(cb => cb.checked = false);
+            document.querySelectorAll('.prof-disp').forEach(cb => cb.checked = false);
+            
+            alert(`✅ Profesor guardado`);
+            renderizarProfesores();
+        }
+
+        function renderizarProfesores() {
+            const lista = document.getElementById('lista-profesores');
+            if (profesores.length === 0) {
+                lista.innerHTML = '<div class="alert alert-info"><span>ℹ️</span><div>No hay profesores registrados</div></div>';
+                return;
+            }
+
+            let html = '';
+            profesores.forEach(prof => {
+                html += `
+                    <div class="profesor-card">
+                        <button class="btn-eliminar-prof" onclick="eliminarProfesor(${prof.id})">🗑️ Eliminar</button>
+                        <div class="profesor-nombre">${prof.nombre}</div>
+                        <div><strong>Asignaturas:</strong> ${prof.materias.join(', ')}</div>
+                        <div><strong>Disponibilidad:</strong> ${prof.disponibilidad.length} horas/semana</div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html;
+        }
+
+        function eliminarProfesor(id) {
+            if (!confirm('¿Seguro que deseas eliminar este profesor?')) return;
+            
+            const profesorAEliminar = profesores.find(p => p.id === id);
+            if (!profesorAEliminar) {
+                alert('❌ Error: Profesor no encontrado');
+                return;
+            }
+            
+            profesores = profesores.filter(p => p.id !== id);
+            renderizarProfesores();
+            alert(`✅ Profesor "${profesorAEliminar.nombre}" eliminado`);
+        }
+
+        function actualizarStats() {
+            document.getElementById('stat-estudiantes').textContent = estudiantes.length;
+            const totalHoras = estudiantes.reduce((sum, e) => 
+                sum + e.temas.reduce((sumT, t) => sumT + t.horas, 0), 0
+            );
+            document.getElementById('stat-horas').textContent = totalHoras;
+            document.getElementById('stat-profesores').textContent = profesores.length;
+            
+            const urgentes = estudiantes.reduce((sum, e) => 
+                sum + e.temas.filter(t => t.urgente).length, 0
+            );
+            document.getElementById('stat-urgentes').textContent = urgentes;
+        }
+
+        // ============ ALGORITMO DE PLANIFICACIÓN v6.0 ============
+        function generarPlanificacion() {
+            if (estudiantes.length === 0 || profesores.length === 0) {
+                alert('⚠️ Necesitas estudiantes y profesores');
+                return;
+            }
+
+            console.log('=== INICIANDO PLANIFICACIÓN v6.0 ===');
+
+            // PASO 1: Crear estructura de necesidades por estudiante
+            // IMPORTANTE: Crear una entrada separada por cada hora solicitada
+            const necesidadesEstudiantes = [];
+            estudiantes.forEach(est => {
+                est.temas.forEach(tema => {
+                    const horasPorSubtema = Math.ceil(tema.horas / tema.subtemas.length);
+                    
+                    tema.subtemas.forEach(subtema => {
+                        let nivelGrupo = 'MEDIO';
+                        if (tema.nota < 5) nivelGrupo = 'MUY_BAJO';
+                        else if (tema.nota < 7) nivelGrupo = 'BAJO';
+                        else if (tema.nota < 8.5) nivelGrupo = 'ALTO';
+                        else nivelGrupo = 'MUY_ALTO';
+                        
+                        // Crear una entrada POR CADA HORA solicitada
+                        for (let h = 0; h < horasPorSubtema; h++) {
+                            necesidadesEstudiantes.push({
+                                estudiante: est,
+                                estudianteId: est.id,
+                                estudianteNombre: est.nombre,
+                                curso: est.curso,
+                                asignatura: tema.asignatura,
+                                tema: tema.tema,
+                                subtema: subtema,
+                                nota: tema.nota,
+                                nivelGrupo: nivelGrupo,
+                                disponibilidad: est.disponibilidad,
+                                urgente: tema.urgente,
+                                tiposClase: tema.tiposClase,
+                                comentarios: tema.comentarios,
+                                archivo: tema.archivo,
+                                horaNumero: h + 1 // Para identificar cuál hora es
+                            });
+                        }
+                    });
+                });
+            });
+
+            console.log(`📊 Total de horas individuales a asignar: ${necesidadesEstudiantes.length}`);
+
+            // PASO 2: Tracking de disponibilidad
+            const estudiantesHorasDia = {};
+            const estudianteSlotsOcupados = {};
+            estudiantes.forEach(est => {
+                estudiantesHorasDia[est.id] = { L: 0, M: 0, X: 0, J: 0, V: 0 };
+                estudianteSlotsOcupados[est.id] = new Set();
+            });
+
+            const clases = [];
+            const diasSemana = ['L', 'M', 'X', 'J', 'V'];
+            const horas = ['15', '16', '17', '18', '19', '20'];
+
+            // PASO 3: Definir cuándo se pueden agrupar cursos
+            function puedenAgruparse(curso1, curso2) {
+                // 1º Bach NUNCA con 2º Bach
+                if ((curso1 === '1BAT' && curso2 === '2BAT') || (curso1 === '2BAT' && curso2 === '1BAT')) {
+                    return false;
+                }
+                // 2º Bach SÍ puede con Selectividad
+                if ((curso1 === '2BAT' && curso2 === 'SELECTIVIDAD') || (curso1 === 'SELECTIVIDAD' && curso2 === '2BAT')) {
+                    return true;
+                }
+                // Mismo curso siempre puede agruparse
+                return curso1 === curso2;
+            }
+
+            // PASO 4: Agrupar necesidades similares (teniendo en cuenta el curso)
+            const grupos = {};
+            necesidadesEstudiantes.forEach(nec => {
+                const tiposClave = nec.tiposClase.sort().join('|') || 'NINGUNO';
+                const key = `${nec.curso}|${nec.asignatura}|${nec.tema}|${nec.subtema}|${nec.nivelGrupo}|${tiposClave}`;
+                if (!grupos[key]) {
+                    grupos[key] = [];
+                }
+                grupos[key].push(nec);
+            });
+
+            console.log(`📦 Grupos creados: ${Object.keys(grupos).length}`);
+
+            // PASO 5: Procesar cada grupo
+            Object.keys(grupos).forEach(key => {
+                const [curso, asignatura, tema, subtema, nivelGrupo, tiposClave] = key.split('|');
+                const grupoNecesidades = grupos[key];
+                
+                console.log(`\n🔄 Procesando: ${asignatura} - ${subtema} - Nivel ${nivelGrupo} - Curso ${curso}`);
+                console.log(`   Total horas en este grupo: ${grupoNecesidades.length}`);
+                
+                // Intentar asignar cada hora
+                let intentos = 0;
+                const maxIntentos = 500;
+                
+                while (grupoNecesidades.length > 0 && intentos < maxIntentos) {
+                    intentos++;
+                    
+                    // Buscar el mejor slot para estas necesidades
+                    let mejorSlot = null;
+                    let mejorProfesor = null;
+                    let estudiantesDisponibles = [];
+                    
+                    // Priorizar urgentes
+                    grupoNecesidades.sort((a, b) => {
+                        if (a.urgente && !b.urgente) return -1;
+                        if (!a.urgente && b.urgente) return 1;
+                        return 0;
+                    });
+                    
+                    for (let dia of diasSemana) {
+                        for (let hora of horas) {
+                            const slot = `${dia}${hora}`;
+                            
+                            // Profesor disponible
+                            const profDisponible = profesores.find(p => 
+                                p.materias.includes(asignatura) &&
+                                p.disponibilidad.includes(slot) &&
+                                !clases.some(c => c.profesor.id === p.id && c.slot === slot)
+                            );
+                            
+                            if (!profDisponible) continue;
+                            
+                            // ¿Qué necesidades pueden asistir a este slot?
+                            const disponibles = grupoNecesidades.filter(nec => 
+                                nec.disponibilidad.includes(slot) &&
+                                estudiantesHorasDia[nec.estudianteId][dia] < 2 &&
+                                !estudianteSlotsOcupados[nec.estudianteId].has(slot)
+                            );
+                            
+                            if (disponibles.length === 0) continue;
+                            
+                            // Agrupar solo estudiantes del mismo curso o compatibles
+                            const cursoBase = disponibles[0].curso;
+                            const compatibles = disponibles.filter(nec => 
+                                puedenAgruparse(cursoBase, nec.curso)
+                            );
+                            
+                            // Maximizar número de estudiantes (hasta 10)
+                            if (compatibles.length > estudiantesDisponibles.length) {
+                                mejorSlot = slot;
+                                mejorProfesor = profDisponible;
+                                estudiantesDisponibles = compatibles.slice(0, 10); // Máx 10
+                            }
+                        }
+                    }
+                    
+                    // Si encontramos un slot válido, crear la clase
+                    if (mejorSlot && estudiantesDisponibles.length > 0) {
+                        const dia = mejorSlot.charAt(0);
+                        
+                        // Obtener estudiantes únicos (sin duplicar el mismo estudiante en la misma clase)
+                        const estudiantesUnicos = {};
+                        estudiantesDisponibles.forEach(nec => {
+                            if (!estudiantesUnicos[nec.estudianteId]) {
+                                estudiantesUnicos[nec.estudianteId] = nec;
+                            }
+                        });
+                        const necesidadesFinales = Object.values(estudiantesUnicos);
+                        
+                        // Crear la clase
+                        const esUrgente = necesidadesFinales.some(nec => nec.urgente);
+                        const esIndividual = necesidadesFinales.length === 1;
+                        
+                        clases.push({
+                            tipo: esIndividual ? 'individual' : (necesidadesFinales.length >= 8 ? 'grupo' : 'pequeño'),
+                            curso: necesidadesFinales[0].curso,
+                            cursosEnClase: [...new Set(necesidadesFinales.map(n => n.curso))],
+                            asignatura,
+                            tema,
+                            subtema,
+                            nivelGrupo,
+                            estudiantes: necesidadesFinales.map(nec => nec.estudiante),
+                            nombresAlumnos: necesidadesFinales.map(nec => nec.estudianteNombre),
+                            ubicaciones: [...new Set(necesidadesFinales.map(nec => `${nec.estudiante.ciudad} (${nec.estudiante.comunidad})`))],
+                            tiposClase: [...new Set(necesidadesFinales.flatMap(nec => nec.tiposClase))],
+                            profesor: mejorProfesor,
+                            slot: mejorSlot,
+                            capacidad: necesidadesFinales.length,
+                            urgente: esUrgente,
+                            comentarios: necesidadesFinales.filter(nec => nec.comentarios).map(nec => `${nec.estudianteNombre}: ${nec.comentarios}`),
+                            apuntes: necesidadesFinales.filter(nec => nec.archivo).map(nec => ({nombre: nec.estudianteNombre, archivo: nec.archivo}))
+                        });
+                        
+                        // Actualizar tracking
+                        necesidadesFinales.forEach(nec => {
+                            estudiantesHorasDia[nec.estudianteId][dia]++;
+                            estudianteSlotsOcupados[nec.estudianteId].add(mejorSlot);
+                        });
+                        
+                        // Eliminar las necesidades asignadas
+                        necesidadesFinales.forEach(necAsignada => {
+                            const idx = grupoNecesidades.findIndex(n => 
+                                n.estudianteId === necAsignada.estudianteId && 
+                                n.subtema === necAsignada.subtema &&
+                                n.horaNumero === necAsignada.horaNumero
+                            );
+                            if (idx !== -1) {
+                                grupoNecesidades.splice(idx, 1);
+                            }
+                        });
+                        
+                        console.log(`   ✅ Clase ${mejorSlot}: ${necesidadesFinales.map(n => n.estudianteNombre).join(', ')}`);
+                    } else {
+                        console.log(`   ⚠️ No se encontró slot disponible para este grupo. Quedan ${grupoNecesidades.length} horas sin asignar.`);
+                        break;
+                    }
+                }
+                
+                if (grupoNecesidades.length > 0) {
+                    console.log(`   ❌ Quedan ${grupoNecesidades.length} horas sin asignar en este grupo después de ${intentos} intentos`);
+                }
+            });
+
+            // PASO 6: Verificar horas no asignadas
+            const horasAsignadas = clases.length;
+            const horasSolicitadas = necesidadesEstudiantes.length;
+            const horasNoAsignadas = horasSolicitadas - horasAsignadas;
+            const tasaAsignacion = ((horasAsignadas / horasSolicitadas) * 100).toFixed(1);
+            
+            console.log(`\n📊 RESULTADOS FINALES:`);
+            console.log(`   - Total horas solicitadas: ${horasSolicitadas}`);
+            console.log(`   - Clases creadas: ${clases.length}`);
+            console.log(`   - Horas asignadas: ${horasAsignadas}`);
+            console.log(`   - Horas sin asignar: ${horasNoAsignadas}`);
+            console.log(`   - Tasa de asignación: ${tasaAsignacion}%`);
+
+            planificacion = { 
+                clases,
+                necesidadesEstudiantes,
+                sinAsignar: horasNoAsignadas,
+                totalSolicitado: horasSolicitadas,
+                tasaAsignacion: tasaAsignacion
+            };
+            
+            document.getElementById('btn-calendario').classList.remove('hidden');
+            cambiarVista('calendario');
+            renderizarCalendario();
+            
+            if (horasNoAsignadas > 0) {
+                setTimeout(() => {
+                    alert(`⚠️ ATENCIÓN: ${horasNoAsignadas} horas NO pudieron asignarse.\n\nPosibles soluciones:\n• Agregar más profesores\n• Ampliar disponibilidad horaria de estudiantes\n• Ampliar disponibilidad de profesores\n\nTasa de asignación actual: ${tasaAsignacion}%`);
+                }, 500);
+            } else {
+                setTimeout(() => {
+                    alert(`✅ ¡PERFECTO! Todas las ${clases.length} horas solicitadas fueron asignadas correctamente.\n\nTasa de asignación: 100%`);
+                }, 500);
+            }
+        }
+
+        function renderizarCalendario() {
+            const grid = document.getElementById('calendario-grid');
+            const diasNombres = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+            const horas = ['15:00', '16:00', '17:00', '18:00', '19:00', '20:00'];
+            const diasCodigos = ['L', 'M', 'X', 'J', 'V'];
+
+            let html = '<div class="calendario-header">Hora</div>';
+            diasNombres.forEach(dia => {
+                html += `<div class="calendario-header">${dia}</div>`;
+            });
+
+            horas.forEach(hora => {
+                html += `<div class="calendario-hora">${hora}-${parseInt(hora.split(':')[0]) + 1}:00</div>`;
+                
+                diasCodigos.forEach(dia => {
+                    const slot = `${dia}${hora.split(':')[0]}`;
+                    const clasesEnSlot = planificacion.clases.filter(c => c.slot === slot);
+                    
+                    let celdaHtml = '';
+                    clasesEnSlot.forEach(clase => {
+                        const tipoClass = clase.tipo;
+                        const urgenteClass = clase.urgente ? ' urgente' : '';
+                        const urgenteIcon = clase.urgente ? ' 🔥' : '';
+                        const individualBadge = clase.tipo === 'individual' ? ' <span class="badge-individual">1:1</span>' : '';
+                        
+                        // Badge de nivel
+                        let nivelTexto = '';
+                        let nivelClass = '';
+                        switch(clase.nivelGrupo) {
+                            case 'MUY_BAJO': nivelTexto = 'Nivel 0-5'; nivelClass = 'nivel-bajo'; break;
+                            case 'BAJO': nivelTexto = 'Nivel 5-7'; nivelClass = 'nivel-bajo'; break;
+                            case 'MEDIO': nivelTexto = 'Nivel 7-8.5'; nivelClass = 'nivel-alto'; break;
+                            case 'ALTO': nivelTexto = 'Nivel 8.5+'; nivelClass = 'nivel-alto'; break;
+                            case 'MUY_ALTO': nivelTexto = 'Nivel 9+'; nivelClass = 'nivel-alto'; break;
+                        }
+                        const nivelBadge = `<span class="nivel-badge ${nivelClass}">${nivelTexto}</span>`;
+                        
+                        // Info de cursos
+                        const cursosInfo = clase.cursosEnClase.length > 1 ? 
+                            `<div style="font-size: 0.85em; margin-top: 3px; color: #92400e;">📚 Cursos: ${clase.cursosEnClase.join(' + ')}</div>` : 
+                            `<div style="font-size: 0.85em; margin-top: 3px; color: #92400e;">📚 Curso: ${clase.curso}</div>`;
+                        
+                        celdaHtml += `
+                            <div class="clase-en-calendario ${tipoClass}${urgenteClass}">
+                                <div class="clase-materia">${clase.asignatura}${urgenteIcon}${individualBadge}</div>
+                                <div class="clase-tema">${clase.tema} → ${clase.subtema}</div>
+                                ${cursosInfo}
+                                <div style="margin: 3px 0;">${nivelBadge}</div>
+                                <div class="clase-alumnos">${clase.capacidad} alumno(s) · ${clase.profesor.nombre}</div>
+                                <div class="clase-nombres">
+                                    <strong>Alumnos:</strong><br>
+                                    ${clase.nombresAlumnos.map(n => '• ' + n).join('<br>')}
+                                </div>
+                                <div style="font-size: 0.85em; margin-top: 3px; color: #92400e;">
+                                    📍 ${clase.ubicaciones.join(', ')}
+                                </div>
+                        `;
+                        
+                        if (clase.tiposClase.length > 0) {
+                            celdaHtml += `<div style="font-size: 0.85em; margin-top: 3px; color: #92400e;">🎯 ${clase.tiposClase.join(', ')}</div>`;
+                        }
+                        
+                        if (clase.apuntes && clase.apuntes.length > 0) {
+                            celdaHtml += '<div style="margin-top: 5px;">';
+                            clase.apuntes.forEach(ap => {
+                                celdaHtml += `<div class="apuntes-link" title="Ver apuntes">📚 ${ap.nombre}: ${ap.archivo}</div>`;
+                            });
+                            celdaHtml += '</div>';
+                        }
+                        
+                        if (clase.comentarios && clase.comentarios.length > 0) {
+                            celdaHtml += '<div class="clase-comentarios">';
+                            clase.comentarios.forEach(com => {
+                                celdaHtml += `📝 ${com}<br>`;
+                            });
+                            celdaHtml += '</div>';
+                        }
+                        
+                        celdaHtml += '</div>';
+                    });
+                    
+                    html += `<div class="calendario-celda">${celdaHtml}</div>`;
+                });
+            });
+
+            grid.innerHTML = html;
+
+            // Resumen
+            const totalClases = planificacion.clases.length;
+            const clasesGrupo = planificacion.clases.filter(c => c.tipo === 'grupo').length;
+            const clasesIndividuales = planificacion.clases.filter(c => c.tipo === 'individual').length;
+            const clasesUrgentes = planificacion.clases.filter(c => c.urgente).length;
+            const horasAsignadas = planificacion.clases.length;
+            const horasSolicitadas = planificacion.totalSolicitado;
+            const tasaAsignacion = planificacion.tasaAsignacion;
+            const sinAsignar = planificacion.sinAsignar;
+
+            // Análisis de discriminación por curso
+            const clasesMixtas = planificacion.clases.filter(c => c.cursosEnClase.length > 1);
+            const clases1Bach = planificacion.clases.filter(c => c.cursosEnClase.includes('1BAT')).length;
+            const clases2Bach = planificacion.clases.filter(c => c.cursosEnClase.includes('2BAT')).length;
+            const clasesSelectividad = planificacion.clases.filter(c => c.cursosEnClase.includes('SELECTIVIDAD')).length;
+
+            const horasProfesores = {};
+            profesores.forEach(prof => {
+                horasProfesores[prof.id] = {
+                    nombre: prof.nombre,
+                    disponibles: prof.disponibilidad.length,
+                    usadas: planificacion.clases.filter(c => c.profesor.id === prof.id).length
+                };
+            });
+
+            let resumenProfs = '<div style="margin-top: 20px;"><h3 style="color: #9a3412; margin-bottom: 10px;">👨‍🏫 Uso de Profesores</h3><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">';
+            Object.values(horasProfesores).forEach(prof => {
+                const porcentaje = (prof.usadas / prof.disponibles * 100).toFixed(0);
+                const color = porcentaje > 80 ? '#22c55e' : porcentaje > 50 ? '#f59e0b' : '#ef4444';
+                resumenProfs += `
+                    <div style="background: white; border: 2px solid #fed7aa; border-radius: 10px; padding: 15px;">
+                        <div style="font-weight: bold; color: #9a3412; margin-bottom: 5px;">${prof.nombre}</div>
+                        <div style="color: #92400e;">Clases: ${prof.usadas}/${prof.disponibles}</div>
+                        <div style="margin-top: 8px; background: #fed7aa; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: ${color}; height: 100%; width: ${porcentaje}%;"></div>
+                        </div>
+                        <div style="text-align: center; margin-top: 5px; font-weight: bold; color: ${color};">${porcentaje}% ocupado</div>
+                    </div>
+                `;
+            });
+            resumenProfs += '</div></div>';
+
+            const alertClass = sinAsignar > 0 ? 'alert-warning' : 'alert-success';
+            const alertIcon = sinAsignar > 0 ? '⚠️' : '✅';
+            const alertMsg = sinAsignar > 0 
+                ? `<strong>ATENCIÓN:</strong> ${sinAsignar} horas NO fueron asignadas. Tasa de asignación: ${tasaAsignacion}%`
+                : `<strong>¡PERFECTO!</strong> Todas las horas solicitadas fueron asignadas. Tasa de asignación: 100%`;
+
+            document.getElementById('resumen-planificacion').innerHTML = `
+                <div class="alert ${alertClass}">
+                    <span style="font-size: 1.5em;">${alertIcon}</span>
+                    <div>${alertMsg}</div>
+                </div>
+
+                <div class="alert alert-info">
+                    <span style="font-size: 1.5em;">📚</span>
+                    <div>
+                        <strong>Discriminación por Curso:</strong><br>
+                        • Total clases 1º Bach: ${clases1Bach}<br>
+                        • Total clases 2º Bach: ${clases2Bach}<br>
+                        • Total clases Selectividad: ${clasesSelectividad}<br>
+                        • Clases mixtas (2º Bach + Selectividad): ${clasesMixtas.length}<br>
+                        • ✅ NO hay mezclas de 1º Bach con 2º Bach
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${totalClases}</div>
+                        <div class="stat-label">Clases Totales</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${clasesGrupo}</div>
+                        <div class="stat-label">Clases Grupales (8-10)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${clasesIndividuales}</div>
+                        <div class="stat-label">Clases Individuales 1:1</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${clasesUrgentes}</div>
+                        <div class="stat-label">Clases Urgentes 🔥</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${horasAsignadas}/${horasSolicitadas}</div>
+                        <div class="stat-label">Horas Asignadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" style="color: ${sinAsignar > 0 ? '#dc2626' : '#22c55e'};">${tasaAsignacion}%</div>
+                        <div class="stat-label">Tasa de Asignación</div>
+                    </div>
+                </div>
+
+                ${resumenProfs}
+            `;
+        }
+
+        // ============ INICIALIZACIÓN ============
+        window.onload = function() {
+            console.log('=== INICIALIZANDO PLANIFICADOR v6.0 ===');
+            
+            // Cargar comunidades autónomas
+            cargarComunidades();
+            
+            // Profesores de ejemplo
+            profesores = [
+                { id: 1, nombre: 'Prof. Elena Torres', materias: ['Matemáticas'], disponibilidad: ['L15','L16','L17','M16','M17','X15','X16','J16','J17','V15','V16'] },
+                { id: 2, nombre: 'Prof. Miguel Fernández', materias: ['Física', 'Química'], disponibilidad: ['L16','L17','L18','M15','M16','X17','X18','J15','J16','V17','V18'] },
+                { id: 3, nombre: 'Prof. Carmen Rodríguez', materias: ['Química', 'Biología'], disponibilidad: ['L18','L19','M17','M18','X16','X17','J17','J18','V16','V17'] }
+            ];
+            contadorProfId = 4;
+            
+            renderizarProfesores();
+            renderizarTemas();
+            
+            console.log('=== PLANIFICADOR v6.0 LISTO ===');
+        };
+    </script>
+</body>
+</html>
