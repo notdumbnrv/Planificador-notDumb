@@ -1,0 +1,22 @@
+# Configuración de Netlify para Planificador v6
+[build]
+  # Directorio donde está el código (raíz del proyecto)
+  publish = "."
+
+  # No necesitamos comando de build porque es HTML estático
+  command = ""
+
+# Configuración de redirección para SPA (Single Page Application)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+
+# Headers de seguridad
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer-when-downgrade"
