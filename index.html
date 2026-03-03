@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>notDumb.es - Planificador v6.0 MEJORADO</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📅</text></svg>">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -268,10 +269,10 @@
                 ✅ Todos reciben sus horas · ✅ Distribución óptima de horarios
             </div>
             <div class="nav-buttons">
-                <button class="nav-btn active" onclick="cambiarVista('estudiantes')">👥 Estudiantes</button>
-                <button class="nav-btn" onclick="cambiarVista('profesores')">👨‍🏫 Profesores</button>
-                <button class="nav-btn" onclick="cambiarVista('planificar')">⚙️ Planificar</button>
-                <button class="nav-btn hidden" id="btn-calendario" onclick="cambiarVista('calendario')">📅 Calendario</button>
+                <button class="nav-btn active" onclick="cambiarVista('estudiantes', event)">👥 Estudiantes</button>
+                <button class="nav-btn" onclick="cambiarVista('profesores', event)">👨‍🏫 Profesores</button>
+                <button class="nav-btn" onclick="cambiarVista('planificar', event)">⚙️ Planificar</button>
+                <button class="nav-btn hidden" id="btn-calendario" onclick="cambiarVista('calendario', event)">📅 Calendario</button>
             </div>
         </div>
 
@@ -1031,12 +1032,14 @@
         };
 
         // ============ FUNCIONES DE UI ============
-        function cambiarVista(vista) {
+        function cambiarVista(vista, event) {
             document.querySelectorAll('[id^="vista-"]').forEach(v => v.classList.add('hidden'));
             document.getElementById('vista-' + vista).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
             if (vista === 'planificar') actualizarStats();
         }
 
@@ -1250,6 +1253,17 @@
                 return;
             }
 
+            // Validar duplicados
+            const estudianteDuplicado = estudiantes.find(e =>
+                e.nombre.toLowerCase() === nombre.toLowerCase() &&
+                e.curso === curso
+            );
+            if (estudianteDuplicado) {
+                if (!confirm(`⚠️ Ya existe un estudiante llamado "${nombre}" en el curso ${curso}.\n\n¿Deseas agregarlo de todas formas?`)) {
+                    return;
+                }
+            }
+
             if (temasTemp.length === 0) {
                 alert('⚠️ Agrega al menos un tema');
                 return;
@@ -1277,6 +1291,7 @@
             document.getElementById('est-instituto').value = '';
             document.querySelectorAll('.disp-check').forEach(cb => cb.checked = false);
             temasTemp = [];
+            archivoApuntes = null; // Resetear el archivo para evitar referencias residuales
             renderizarTemas();
             
             alert(`✅ Estudiante guardado con ${totalHoras} hora(s)`);
@@ -1371,14 +1386,23 @@
         }
 
         function eliminarProfesor(id) {
-            if (!confirm('¿Seguro que deseas eliminar este profesor?')) return;
-            
             const profesorAEliminar = profesores.find(p => p.id === id);
             if (!profesorAEliminar) {
                 alert('❌ Error: Profesor no encontrado');
                 return;
             }
-            
+
+            // Verificar si el profesor tiene clases asignadas en la planificación actual
+            if (planificacion && planificacion.clases) {
+                const clasesDelProfesor = planificacion.clases.filter(c => c.profesorId === id);
+                if (clasesDelProfesor.length > 0) {
+                    alert(`⚠️ No se puede eliminar al profesor "${profesorAEliminar.nombre}" porque tiene ${clasesDelProfesor.length} clase(s) asignada(s) en la planificación actual.\n\nPrimero debes generar una nueva planificación sin este profesor.`);
+                    return;
+                }
+            }
+
+            if (!confirm('¿Seguro que deseas eliminar este profesor?')) return;
+
             profesores = profesores.filter(p => p.id !== id);
             renderizarProfesores();
             alert(`✅ Profesor "${profesorAEliminar.nombre}" eliminado`);
@@ -1412,17 +1436,22 @@
             const necesidadesEstudiantes = [];
             estudiantes.forEach(est => {
                 est.temas.forEach(tema => {
-                    const horasPorSubtema = Math.ceil(tema.horas / tema.subtemas.length);
-                    
-                    tema.subtemas.forEach(subtema => {
+                    // Distribuir horas equitativamente entre subtemas
+                    const horasBase = Math.floor(tema.horas / tema.subtemas.length);
+                    const horasExtra = tema.horas % tema.subtemas.length; // Horas que sobran
+
+                    tema.subtemas.forEach((subtema, indexSubtema) => {
                         let nivelGrupo = 'MEDIO';
                         if (tema.nota < 5) nivelGrupo = 'MUY_BAJO';
                         else if (tema.nota < 7) nivelGrupo = 'BAJO';
                         else if (tema.nota < 8.5) nivelGrupo = 'ALTO';
                         else nivelGrupo = 'MUY_ALTO';
-                        
+
+                        // Los primeros 'horasExtra' subtemas reciben una hora adicional
+                        const horasParaEsteSubtema = horasBase + (indexSubtema < horasExtra ? 1 : 0);
+
                         // Crear una entrada POR CADA HORA solicitada
-                        for (let h = 0; h < horasPorSubtema; h++) {
+                        for (let h = 0; h < horasParaEsteSubtema; h++) {
                             necesidadesEstudiantes.push({
                                 estudiante: est,
                                 estudianteId: est.id,
